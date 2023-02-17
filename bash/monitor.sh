@@ -2,9 +2,9 @@
 
 # Define the threshold for the system load average
 LOAD_THRESHOLD=2
-
+echo "$LOAD_THRESHOLD"
 # Define the email address to send alerts to
-EMAIL_ADDRESS=youremail@example.com
+EMAIL_ADDRESS=rakeshkhopade12396@gmail.com
 
 # Get the current system load average
 LOAD=$(uptime | awk '{print $10}' | cut -d "," -f 1)
