@@ -1,0 +1,19 @@
+- name: "installing mginx by ansible"
+  hosts: all
+  tasks:
+   - name: "installing nginx package"
+     apt:
+      name: nginx
+      state: present
+
+   - name: "add text in index.html"
+     command: echo "hello there " > /var/www/html/index.html
+
+   - name: "restart nginx service"
+     service:
+      name: nginx
+      state: started
+
+
+
+
