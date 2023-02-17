@@ -1,0 +1,80 @@
+- name: Install Nagios on Debian
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Install pre-requisite packages
+      apt:
+        name:
+          - build-essential
+          - libgd-dev
+          - libssl-dev
+          - unzip
+
+    - name: Download Nagios Core source code
+      get_url:
+        url: "https://github.com/NagiosEnterprises/nagioscore/archive/nagios-{{ nagios_version }}.tar.gz"
+        dest: /tmp/nagios-{{ nagios_version }}.tar.gz
+
+    - name: Extract Nagios Core source code
+      unarchive:
+        src: /tmp/nagios-{{ nagios_version }}.tar.gz
+        dest: /tmp/
+        remote_src: yes
+
+    - name: Configure Nagios Core
+      command: >
+        ./configure
+        --with-command-group=nagcmd
+        --with-httpd_conf=/etc/apache2/sites-enabled
+        --prefix=/usr/local/nagios
+      args:
+        chdir: /tmp/nagioscore-nagios-{{ nagios_version }}
+
+    - name: Build and install Nagios Core
+      command: >
+        make all
+        && make install
+        && make install-commandmode
+        && make install-init
+        && make install-config
+      args:
+        chdir: /tmp/nagioscore-nagios-{{ nagios_version }}
+
+    - name: Install Nagios Plugins
+      apt:
+        name: nagios-plugins-all
+
+    - name: Configure Nagios
+      template:
+        src: nagios.cfg.j2
+        dest: /usr/local/nagios/etc/nagios.cfg
+
+    - name: Add nagiosadmin user
+      user:
+        name: nagiosadmin
+        comment: "Nagios Admin"
+        password: "{{ nagiosadmin_password }}"
+      when: nagiosadmin_password is defined
+
+    - name: Install and configure Apache
+      apt:
+        name: apache2
+        state: present
+      notify:
+        - Restart Apache
+
+    - name: Enable required Apache modules
+      apache2_module:
+        state: present
+        name: [cgid, rewrite, suexec, ssl]
+
+    - name: Configure Apache for Nagios
+      template:
+        src: nagios-apache.conf.j2
+        dest: /etc/apache2/sites-enabled/nagios.conf
+
+    - name: Restart Apache
+      service:
+        name: apache2
+        state: restarted
