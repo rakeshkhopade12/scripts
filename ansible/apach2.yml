@@ -1,0 +1,25 @@
+---
+- name: Install and configure Apache web server
+  hosts: webservers
+  become: true
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install Apache
+      apt:
+        name: apache2
+        state: present
+
+    - name: Copy Apache config file
+      copy:
+        src: files/apache.conf
+        dest: /etc/apache2/apache2.conf
+        mode: '0644'
+
+    - name: Restart Apache
+      service:
+        name: apache2
+        state: restarted
