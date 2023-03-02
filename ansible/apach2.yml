@@ -1,5 +1,5 @@
 ---
-- name: Install and configure Apache web server
+- name: Install and configure Apache web server.
   hosts: webservers
   become: true
 
