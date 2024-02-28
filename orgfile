@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# Loop through each file in the current directory
+for file in *; do
+    # Check if the item is a file (not a directory)
+    if [ -f "$file" ]; then
+        # Extract the file extension
+        extension="${file##*.}"
+        
+        # Create a folder for the extension if it doesn't already exist
+        if [ ! -d "$extension" ]; then
+            mkdir "$extension"
+        fi
+        
+        # Move the file into the folder for its extension
+        mv "$file" "$extension/"
+    fi
+done
